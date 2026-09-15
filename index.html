@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نصب‌کننده اتوماتیک کۆژین (Kojin Auto-Installer)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Vazirmatn', sans-serif; }
+    .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+  
+  <!-- Background Glow -->
+  <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen"></div>
+    <div class="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-purple-600/20 rounded-full blur-[120px] mix-blend-screen"></div>
+  </div>
+
+  <div class="w-full max-w-lg z-10 glass rounded-3xl p-8 shadow-2xl">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">
+        <i data-lucide="zap" class="text-white w-8 h-8"></i>
+      </div>
+      <h1 class="text-3xl font-black mb-2">استقرار اتوماتیک کۆژین ۱.۱</h1>
+      <p class="text-slate-400 text-sm">نصب سیستم دور زدن فیلترینگ و ربات با یک کلیک</p>
+    </div>
+
+    <form id="installForm" class="space-y-5">
+      
+      <div>
+        <label class="block text-sm font-bold text-slate-300 mb-1">توکن کلادفلر (API Token)</label>
+        <div class="flex gap-2">
+          <input type="password" id="apiToken" required dir="ltr" placeholder="دسترسی Edit به Workers & D1" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-mono text-slate-200">
+          <a href="https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=[{%22id%22:%22c8fed203ed3043cba015a93ad1616f1f%22},{%22id%22:%2282e64a83756745bbbb1c9c2701bf816b%22}]" target="_blank" class="flex-shrink-0 px-4 py-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded-xl font-bold flex items-center justify-center transition-colors" title="ساخت اتوماتیک توکن کلادفلر">
+            <i data-lucide="external-link" class="w-5 h-5"></i>
+          </a>
+        </div>
+        <p class="text-[10px] text-slate-500 mt-1">با کلیک روی دکمه مقابل، توکن با دسترسی‌های لازم آماده می‌شود.</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-slate-300 mb-1">توکن ربات تلگرام (BotFather)</label>
+        <div class="flex gap-2">
+          <input type="password" id="tgToken" required dir="ltr" placeholder="123456789:ABCDefgh..." class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-sm font-mono text-slate-200">
+          <a href="https://t.me/BotFather?start=newbot" target="_blank" class="flex-shrink-0 px-4 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-xl font-bold flex items-center justify-center transition-colors" title="دریافت توکن از BotFather">
+            <i data-lucide="external-link" class="w-5 h-5"></i>
+          </a>
+        </div>
+        <p class="text-[10px] text-slate-500 mt-1">با کلیک روی دکمه مقابل وارد ربات BotFather شوید و توکن خود را دریافت کنید.</p>
+      </div>
+
+      <button type="submit" id="submitBtn" class="w-full py-4 mt-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-xl font-bold text-white shadow-lg shadow-indigo-500/25 transition-all flex justify-center items-center gap-2">
+        <i data-lucide="rocket" class="w-5 h-5"></i>
+        <span>شروع نصب اتوماتیک</span>
+      </button>
+
+      <!-- بخش نمایش وضعیت نصب -->
+      <div id="statusBox" class="hidden mt-6 p-4 rounded-xl bg-slate-900/80 border border-slate-700 space-y-3 text-sm">
+        <div id="step1" class="flex items-center gap-3 text-slate-500 font-bold"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin hidden"></i> ۱. ساخت پایگاه داده (D1)</div>
+        <div id="step2" class="flex items-center gap-3 text-slate-500 font-bold"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin hidden"></i> ۲. آپلود هسته پردازشی و ربات</div>
+        <div id="step3" class="flex items-center gap-3 text-slate-500 font-bold"><i data-lucide="circle-dashed" class="w-4 h-4 animate-spin hidden"></i> ۳. اتصال وب‌هوک تلگرام</div>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    document.getElementById('installForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submitBtn');
+      const statusBox = document.getElementById('statusBox');
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> در حال استقرار...';
+      lucide.createIcons();
+      statusBox.classList.remove('hidden');
+
+      // داده‌های ورودی کاربر
+      const payload = {
+        apiToken: document.getElementById('apiToken').value,
+        tgToken: document.getElementById('tgToken').value
+      };
+
+      try {
+        // ارسال درخواست به سرور نصب‌کننده (پروژه عمومی شما)
+        // این URL باید آدرس Worker عمومی شما باشد
+        const response = await fetch('/api/install', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if(data.success) {
+          btn.classList.replace('from-indigo-500', 'from-emerald-500');
+          btn.classList.replace('to-purple-600', 'to-teal-500');
+          btn.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i> نصب با موفقیت انجام شد!';
+          lucide.createIcons();
+          
+          alert(`نصب موفقیت آمیز بود!\nلینک پنل شما:\nhttps://kojin.YOUR-DOMAIN.workers.dev`);
+        } else {
+          throw new Error(data.message || 'خطای ناشناخته');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = 'تلاش مجدد';
+        alert('خطا در نصب: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
